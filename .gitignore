@@ -1,0 +1,23 @@
+# SSH Keys (NEVER commit these!)
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+jenkins_github_key
+jenkins_github_key.pub
+*.ppk
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
