@@ -139,12 +139,14 @@ Your credential has been successfully added to Jenkins.
 
    - On your GitHub repository page, click **Code** → **SSH**
    - Copy the SSH URL (format: `git@github.com:username/repository.git`)
-4. Paste the SSH URL into the **Repository URL** field in Jenkins
+4. Paste the SSH URL into the **Repository URL** field in Jenkins.
 
 ![Add SSH URL to Jenkins](screenshots/have-to-add-ssh-adress-to-jenkins.png)
 
-5. From the **Credentials** dropdown, select the credential you created in Step 3
-6. Click outside the field to verify - the authentication error should disappear
+5. From the **Credentials** dropdown, select the credential you created in Step 3.  
+   This is where the SSH repository URL and the Jenkins SSH credential come together.
+6. Click outside the field to verify - the authentication error should disappear.  
+   If you see an authentication or host key error here, check the **Troubleshooting** section below.
 7. Configure the branch name (e.g., `main` or `master` depending on your repository)
 8. Click **Apply** and **Save**
 
