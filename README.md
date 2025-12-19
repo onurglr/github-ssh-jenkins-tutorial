@@ -1,6 +1,10 @@
 # GitHub Private Repository Access with SSH Key in Jenkins
 
-This guide explains how to access a private GitHub repository using SSH keys in Jenkins.
+**Short Summary:** This repo shows, step by step, how to let Jenkins access a private GitHub repository using an SSH key.  
+- Generate an SSH key on your local machine  
+- Add the public key to your GitHub account  
+- Add the private key to Jenkins as a credential  
+- Configure a Jenkins job with the SSH repository URL and that credential, then run the build  
 
 ## Overview
 
@@ -81,20 +85,13 @@ This will create two files in your `.ssh` folder:
 
 > **Note**: On Linux/macOS, you can also use `cat ~/.ssh/jenkins_github_key.pub` to display the public key directly in the terminal.
 
-```mermaid
-graph LR
-    A[ssh-keygen] --> B[Private Key] --> C[Public Key]
-    
-    style A fill:#e1f5ff
-    style B fill:#ffcccc
-    style C fill:#ccffcc
-```
-
 ## Step 2: Add Public Key to GitHub
 
 1. Log in to your GitHub account
 2. Go to **Settings** → **SSH and GPG keys**
 3. Click on **New SSH key**
+
+![Add SSH Key to GitHub](screenshots/Add-ssh-github.png)
 
 4. Give your key a title (e.g., "Jenkins Access Key")
 5. Open your public key file (`jenkins_github_key.pub`) in a text editor:
@@ -109,19 +106,13 @@ graph LR
 
 Your SSH key has been successfully added to your GitHub account.
 
-```mermaid
-graph LR
-    A[Copy Public Key] --> B[GitHub Settings] --> C[Paste Key] --> D[Add SSH Key] --> E[Success]
-    
-    style A fill:#e1f5ff
-    style E fill:#d4edda
-```
-
 ## Step 3: Add Credential in Jenkins
 
 1. In your Jenkins job, go to the **Credentials** section
 2. Click **Add**
 3. From the dropdown, select **SSH Username with private key**
+
+![Add Credential in Jenkins](screenshots/add-ssh-jenkins.png)
 
 4. Fill in the following:
    - **ID**: Give it a unique identifier (e.g., `github-ssh-key`)
@@ -140,14 +131,6 @@ Your credential has been successfully added to Jenkins.
 
 ![Jenkins Credential Added](screenshots/Credentials-jenkins-github-connected.png)
 
-```mermaid
-graph LR
-    A[Jenkins] --> B[Add Credential] --> C[SSH Username + Private Key] --> D[Paste Key] --> E[Saved]
-    
-    style A fill:#e1f5ff
-    style E fill:#d4edda
-```
-
 ## Step 4: Configure Jenkins Job with SSH URL
 
 1. In your Jenkins job configuration, go to the **Source Code Management** section
@@ -162,14 +145,6 @@ graph LR
 7. Configure the branch name (e.g., `main` or `master` depending on your repository)
 8. Click **Apply** and **Save**
 
-```mermaid
-graph LR
-    A[Copy SSH URL] --> B[Paste in Jenkins] --> C[Select Credential] --> D[Test Connection] --> E[Configure Branch] --> F[Save]
-    
-    style A fill:#e1f5ff
-    style F fill:#d4edda
-```
-
 ## Step 5: Build and Verify
 
 1. Click **Build Now** in your Jenkins job
@@ -179,21 +154,9 @@ graph LR
 2. If you encounter branch-related errors, go back to **Configure** and ensure the branch name matches your repository's default branch (usually `main` instead of `master`)
 3. Once the build succeeds, you can verify by checking the **Workspace** - all files from your GitHub repository should be available
 
-```mermaid
-graph LR
-    A[Build Now] --> B{Status} -->|Success| C[Workspace Files]
-    B -->|Error| D[Fix Branch] --> A
-    
-    style A fill:#e1f5ff
-    style C fill:#d4edda
-    style B fill:#fff3cd
-```
-
 ## Troubleshooting
 
 ### Authentication Error
-
-![Authentication Error](screenshots/image%20(6).png)
 
 - Ensure the public key is correctly added to your GitHub account
 - Verify the private key content is complete (including BEGIN/END markers)
@@ -231,20 +194,6 @@ graph LR
 - Verify the GitHub username matches the one used in Jenkins credentials
 - On Windows, permission issues are less common, but ensure the key file is readable
 
-## Complete Workflow Diagram
-
-```mermaid
-graph LR
-    A[1. Generate Keys] --> B[2. Add to GitHub] --> C[3. Add to Jenkins] --> D[4. Configure Job] --> E[5. Build] --> F[Access Repo]
-    
-    style A fill:#e1f5ff
-    style B fill:#ccffcc
-    style C fill:#ccccff
-    style D fill:#ffffcc
-    style E fill:#fff3cd
-    style F fill:#d4edda
-```
-
 ## Summary
 
 By following these steps, you can:
@@ -256,22 +205,6 @@ By following these steps, you can:
 This setup provides a secure way to integrate your private GitHub repositories with Jenkins using SSH key authentication.
 
 ## Security Best Practices
-
-```mermaid
-mindmap
-  root((SSH Key Security))
-    Private Key
-      Never commit to repo
-      Store securely
-      Use passphrase if possible
-    Public Key
-      Safe to share
-      Add to GitHub only
-    Credentials
-      Use Jenkins credential store
-      Rotate keys periodically
-      Limit key permissions
-```
 
 - **Never commit private keys** to version control
 - **Use strong passphrases** for production environments
