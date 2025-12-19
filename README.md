@@ -51,7 +51,7 @@ On your local system, SSH keys are stored in your user's `.ssh` folder:
 - **Windows**: `C:\Users\YourUsername\.ssh\`
 - **Linux/macOS**: `~/.ssh/` or `/home/username/.ssh/`
 
-![SSH Key Generation](screenshots/step1-ssh-keygen.png)
+![SSH Key Generation](screenshots/ssh-keygen-create.png)
 
 ### Windows
 1. Open **Command Prompt** or **PowerShell**
@@ -92,13 +92,9 @@ graph LR
 
 ## Step 2: Add Public Key to GitHub
 
-![GitHub SSH Settings](screenshots/step2-github-ssh-settings.png)
-
 1. Log in to your GitHub account
 2. Go to **Settings** → **SSH and GPG keys**
 3. Click on **New SSH key**
-
-![Add SSH Key to GitHub](screenshots/step2-add-ssh-key.png)
 
 4. Give your key a title (e.g., "Jenkins Access Key")
 5. Open your public key file (`jenkins_github_key.pub`) in a text editor:
@@ -123,13 +119,9 @@ graph LR
 
 ## Step 3: Add Credential in Jenkins
 
-![Jenkins Credentials Page](screenshots/step3-jenkins-credentials.png)
-
 1. In your Jenkins job, go to the **Credentials** section
 2. Click **Add**
 3. From the dropdown, select **SSH Username with private key**
-
-![Add Credential in Jenkins](screenshots/step3-add-credential.png)
 
 4. Fill in the following:
    - **ID**: Give it a unique identifier (e.g., `github-ssh-key`)
@@ -146,6 +138,8 @@ graph LR
 
 Your credential has been successfully added to Jenkins.
 
+![Jenkins Credential Added](screenshots/Credentials-jenkins-github-connected.png)
+
 ```mermaid
 graph LR
     A[Jenkins] --> B[Add Credential] --> C[SSH Username + Private Key] --> D[Paste Key] --> E[Saved]
@@ -156,13 +150,9 @@ graph LR
 
 ## Step 4: Configure Jenkins Job with SSH URL
 
-![Jenkins Job Configuration](screenshots/step4-jenkins-job-config.png)
-
 1. In your Jenkins job configuration, go to the **Source Code Management** section
 2. Select **Git**
 3. For the **Repository URL**, use the SSH URL (not the HTTPS URL):
-
-![GitHub SSH URL](screenshots/step4-ssh-url.png)
 
    - On your GitHub repository page, click **Code** → **SSH**
    - Copy the SSH URL (format: `git@github.com:username/repository.git`)
@@ -184,12 +174,10 @@ graph LR
 
 1. Click **Build Now** in your Jenkins job
 
-![Build Success](screenshots/step5-build-success.png)
+![Build Success](screenshots/Stage-working.png)
 
 2. If you encounter branch-related errors, go back to **Configure** and ensure the branch name matches your repository's default branch (usually `main` instead of `master`)
 3. Once the build succeeds, you can verify by checking the **Workspace** - all files from your GitHub repository should be available
-
-![Workspace Files](screenshots/step5-workspace-files.png)
 
 ```mermaid
 graph LR
@@ -229,6 +217,9 @@ graph LR
   ```bash
   ssh-keyscan github.com >> /home/jenkins/.ssh/known_hosts
   ```
+
+![Host Key Solution](screenshots/known_hosts_solution.png)
+
 - **Alternative (less secure)**: In Jenkins credential configuration, you can disable host key verification, but this is not recommended for production
 
 ### Permission Denied
