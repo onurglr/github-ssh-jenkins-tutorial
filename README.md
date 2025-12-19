@@ -7,48 +7,26 @@ This guide explains how to access a private GitHub repository using SSH keys in 
 This tutorial walks you through the complete process of setting up SSH key authentication to access private GitHub repositories from Jenkins.
 
 ```mermaid
-flowchart TD
-    A[Start] --> B[Generate SSH Key Pair]
-    B --> C[Add Public Key to GitHub]
-    C --> D[Add Private Key as Credential in Jenkins]
-    D --> E[Configure Jenkins Job with SSH URL]
-    E --> F[Select Credential from Dropdown]
-    F --> G[Build and Verify]
-    G --> H[Success: Access Private Repo]
+flowchart LR
+    A[Start] --> B[Generate Keys] --> C[Add to GitHub] --> D[Add to Jenkins] --> E[Configure Job] --> F[Build] --> G[Success]
     
     style A fill:#e1f5ff
-    style H fill:#d4edda
-    style B fill:#fff3cd
-    style C fill:#fff3cd
-    style D fill:#fff3cd
-    style E fill:#fff3cd
+    style G fill:#d4edda
 ```
 
 ## Architecture Diagram
 
 ```mermaid
 graph LR
-    subgraph Local["Local Machine"]
-        A[SSH Keygen] --> B[Private Key<br/>jenkins_github_key]
-        A --> C[Public Key<br/>jenkins_github_key.pub]
-    end
-    
-    subgraph GitHub["GitHub"]
-        C --> D[SSH Keys Settings]
-        D --> E[Private Repository]
-    end
-    
-    subgraph Jenkins["Jenkins"]
-        B --> F[Credentials Store]
-        F --> G[Jenkins Job]
-        G --> E
-    end
+    A[Local: ssh-keygen] --> B[Private Key] --> C[Jenkins Credentials]
+    A --> D[Public Key] --> E[GitHub SSH Keys]
+    C --> F[Jenkins Job] --> G[Private Repo]
+    E --> G
     
     style A fill:#e1f5ff
     style B fill:#ffcccc
-    style C fill:#ccffcc
-    style E fill:#ffffcc
-    style G fill:#ccccff
+    style D fill:#ccffcc
+    style G fill:#ffffcc
 ```
 
 ## Prerequisites
@@ -105,8 +83,7 @@ This will create two files in your `.ssh` folder:
 
 ```mermaid
 graph LR
-    A[ssh-keygen command] --> B[Private Key<br/>jenkins_github_key]
-    A --> C[Public Key<br/>jenkins_github_key.pub]
+    A[ssh-keygen] --> B[Private Key] --> C[Public Key]
     
     style A fill:#e1f5ff
     style B fill:#ffcccc
@@ -137,20 +114,11 @@ graph LR
 Your SSH key has been successfully added to your GitHub account.
 
 ```mermaid
-sequenceDiagram
-    participant User
-    participant GitHub
-    participant Local as Local Machine
+graph LR
+    A[Copy Public Key] --> B[GitHub Settings] --> C[Paste Key] --> D[Add SSH Key] --> E[Success]
     
-    User->>GitHub: Navigate to Settings > SSH Keys
-    User->>GitHub: Click "New SSH key"
-    User->>Local: Open public key file
-    Local->>User: Display public key content
-    User->>GitHub: Paste public key
-    User->>GitHub: Click "Add SSH key"
-    GitHub->>User: Request password
-    User->>GitHub: Enter password
-    GitHub->>User: SSH key added successfully
+    style A fill:#e1f5ff
+    style E fill:#d4edda
 ```
 
 ## Step 3: Add Credential in Jenkins
@@ -179,17 +147,11 @@ sequenceDiagram
 Your credential has been successfully added to Jenkins.
 
 ```mermaid
-graph TD
-    A[Jenkins Job] --> B[Credentials Section]
-    B --> C[Click Add]
-    C --> D[Select: SSH Username with private key]
-    D --> E[Enter ID, Username]
-    E --> F[Paste Private Key]
-    F --> G[Click Add]
-    G --> H[Credential Saved]
+graph LR
+    A[Jenkins] --> B[Add Credential] --> C[SSH Username + Private Key] --> D[Paste Key] --> E[Saved]
     
     style A fill:#e1f5ff
-    style H fill:#d4edda
+    style E fill:#d4edda
 ```
 
 ## Step 4: Configure Jenkins Job with SSH URL
@@ -211,21 +173,11 @@ graph TD
 8. Click **Apply** and **Save**
 
 ```mermaid
-sequenceDiagram
-    participant User
-    participant Jenkins
-    participant GitHub
+graph LR
+    A[Copy SSH URL] --> B[Paste in Jenkins] --> C[Select Credential] --> D[Test Connection] --> E[Configure Branch] --> F[Save]
     
-    User->>Jenkins: Configure Job > Source Code Management
-    User->>Jenkins: Select Git
-    User->>GitHub: Copy SSH URL (git@github.com:...)
-    User->>Jenkins: Paste SSH URL
-    User->>Jenkins: Select Credential from dropdown
-    Jenkins->>GitHub: Test connection with SSH key
-    GitHub->>Jenkins: Authentication successful
-    Jenkins->>User: Error disappears
-    User->>Jenkins: Configure branch (main/master)
-    User->>Jenkins: Apply and Save
+    style A fill:#e1f5ff
+    style F fill:#d4edda
 ```
 
 ## Step 5: Build and Verify
@@ -240,21 +192,21 @@ sequenceDiagram
 ![Workspace Files](screenshots/step5-workspace-files.png)
 
 ```mermaid
-flowchart LR
-    A[Build Now] --> B{Build Status}
-    B -->|Success| C[Check Workspace]
-    B -->|Branch Error| D[Update Branch Name]
-    D --> A
-    C --> E[Files Available]
+graph LR
+    A[Build Now] --> B{Status} -->|Success| C[Workspace Files]
+    B -->|Error| D[Fix Branch] --> A
     
     style A fill:#e1f5ff
-    style E fill:#d4edda
+    style C fill:#d4edda
     style B fill:#fff3cd
 ```
 
 ## Troubleshooting
 
 ### Authentication Error
+
+![Authentication Error](screenshots/image%20(6).png)
+
 - Ensure the public key is correctly added to your GitHub account
 - Verify the private key content is complete (including BEGIN/END markers)
 - Check that the correct credential is selected in the Jenkins job
@@ -262,6 +214,22 @@ flowchart LR
 ### Branch Not Found
 - Verify your repository's default branch name (`main` vs `master`)
 - Update the branch name in Jenkins job configuration accordingly
+
+### Host Key Verification Failed
+
+![Host Key Verification Failed](screenshots/known_hosts.png)
+
+- **Error**: `No ED25519 host key is known for github.com and you have requested strict checking`
+- **Cause**: Jenkins server doesn't have GitHub's host key in its `known_hosts` file
+- **Solution**: Add GitHub's host key to Jenkins server's `known_hosts`:
+  ```bash
+  ssh-keyscan github.com >> ~/.ssh/known_hosts
+  ```
+  Or if Jenkins runs as a different user:
+  ```bash
+  ssh-keyscan github.com >> /home/jenkins/.ssh/known_hosts
+  ```
+- **Alternative (less secure)**: In Jenkins credential configuration, you can disable host key verification, but this is not recommended for production
 
 ### Permission Denied
 - **Linux/macOS**: Ensure the SSH key has correct permissions:
@@ -275,39 +243,15 @@ flowchart LR
 ## Complete Workflow Diagram
 
 ```mermaid
-graph TB
-    subgraph Step1["Step 1: Generate Keys"]
-        A1[Run ssh-keygen] --> A2[Private Key Created]
-        A1 --> A3[Public Key Created]
-    end
+graph LR
+    A[1. Generate Keys] --> B[2. Add to GitHub] --> C[3. Add to Jenkins] --> D[4. Configure Job] --> E[5. Build] --> F[Access Repo]
     
-    subgraph Step2["Step 2: GitHub Setup"]
-        A3 --> B1[Add Public Key to GitHub]
-        B1 --> B2[GitHub Authenticated]
-    end
-    
-    subgraph Step3["Step 3: Jenkins Credentials"]
-        A2 --> C1[Add Private Key to Jenkins]
-        C1 --> C2[Credential Stored]
-    end
-    
-    subgraph Step4["Step 4: Job Configuration"]
-        B2 --> D1[Add SSH URL to Job]
-        C2 --> D1
-        D1 --> D2[Select Credential]
-        D2 --> D3[Configure Branch]
-    end
-    
-    subgraph Step5["Step 5: Build"]
-        D3 --> E1[Build Now]
-        E1 --> E2[Access Private Repo]
-    end
-    
-    style A1 fill:#e1f5ff
-    style B2 fill:#ccffcc
-    style C2 fill:#ccccff
-    style D3 fill:#ffffcc
-    style E2 fill:#d4edda
+    style A fill:#e1f5ff
+    style B fill:#ccffcc
+    style C fill:#ccccff
+    style D fill:#ffffcc
+    style E fill:#fff3cd
+    style F fill:#d4edda
 ```
 
 ## Summary
